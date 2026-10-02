@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rails Capability Map</title>
+<script>
+// FOUC prevention: apply theme before paint
+(function() {
+  var pref = localStorage.getItem('theme-preference') || 'auto';
+  var theme = pref === 'night' ? 'dark' : pref === 'day' ? 'light' : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.documentElement.setAttribute('data-theme-preference', pref);
+})();
+</script>
+<style>
+  :root {
+    /*
+     * Visual Identity — WCAG AAA adapted
+     * Reference blue: #00049E | Grey: #706F6F | Black: #000000
+     * Secondary: #2C32FF #00B0F0 #00B4C4 #82CA9C #9185BE #B9BAFF
+     * Typography: Arial
+     */
+    --bg: #f4f4f4;
+    --surface: #ffffff;
+    --border: #d0d0cf;
+    --text: #000000;           /* 21:1 on --surface */
+    --text-secondary: #4a4a49; /* 7.7:1 on --surface */
+    --accent: #00049E;         /* 14.5:1 on --surface */
+    --accent-light: #eef0fa;
+    --accent-on-light: #00049E;/* 13.2:1 on --accent-light */
+    --c1: #00049E;
+    --c1-light: #eef0fa;
+    --c1-on-light: #00049E;
+    --c2: #006b6b;             /* darkened teal for AAA — from #00B4C4 */
+    --c2-light: #e6f7f7;
+    --c2-on-light: #005555;
+    --c3: #1a1f99;             /* darkened vivid blue — from #2C32FF */
+    --c3-light: #ededfc;
+    --c3-on-light: #1a1f99;
+    --c4: #5a4a8a;             /* darkened purple — from #9185BE */
+    --c4-light: #f2f0f8;
+    --c4-on-light: #4a3d75;
+    --c5: #00698f;             /* darkened sky blue — from #00B0F0 */
+    --c5-light: #e6f4fa;
+    --c5-on-light: #005a7a;
+    --c6: #2d7a4a;             /* darkened green — from #82CA9C */
+    --c6-light: #edf7f1;
+    --c6-on-light: #1f6338;
+    --c7: #8a4500;             /* darkened amber — distinctive from other caps */
+    --c7-light: #fef3e6;
+    --c7-on-light: #6b3600;
+    --c8: #2d7a4a;             /* green — Design from Business */
+    --c8-light: #edf7f1;
+    --c8-on-light: #1f6338;
+    --c9: #7a2d5a;             /* plum — Write to Drive Decisions */
+    --c9-light: #f8edf4;
+    --c9-on-light: #5e1d45;
+    --c10: #8a4500;            /* amber — Lead the Conversation */
+    --c10-light: #fef3e6;
+    --c10-on-light: #6b3600;
+    --green: #1f6338;          /* check color */
+    --green-light: #edf7f1;
+    --green-on-light: #1f6338;
+    --focus: #00049E;
+    --bv-grey: #706F6F;
+    --radius: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  [data-theme="dark"] {
+    --bg: #161616;
+    --surface: #1e1e1e;
+    --border: #333333;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent: #6b9fff;
+    --accent-light: #1a2433;
+    --accent-on-light: #8bb5ff;
+    --c1: #6b9fff; --c1-light: #1a2433; --c1-on-light: #8bb5ff;
+    --c2: #4dc9c0; --c2-light: #122928; --c2-on-light: #6dd8d0;
+    --c3: #7b88f0; --c3-light: #1a1d33; --c3-on-light: #99a4f5;
+    --c4: #b0a0d8; --c4-light: #221e30; --c4-on-light: #c8bbe5;
+    --c5: #50b8d8; --c5-light: #122530; --c5-on-light: #70c8e5;
+    --c6: #6db88a; --c6-light: #152a1c; --c6-on-light: #8dcc9f;
+    --c7: #d89048; --c7-light: #2a1f12; --c7-on-light: #e5a868;
+    --c8: #6db88a; --c8-light: #152a1c; --c8-on-light: #8dcc9f;
+    --c9: #cc88b5; --c9-light: #2a1525; --c9-on-light: #dda0cc;
+    --c10: #d89048; --c10-light: #2a1f12; --c10-on-light: #e5a868;
+    --green: #6db88a; --green-light: #152a1c; --green-on-light: #8dcc9f;
+    --focus: #6b9fff;
+    --bv-grey: #909090;
+    --shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  [data-theme="dark"] .mermaid svg { filter: invert(0.88) hue-rotate(180deg) saturate(0.8); }
+
+  .transitions-enabled, .transitions-enabled * {
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .theme-toggle button {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: none;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    border-right: 1px solid var(--border);
+  }
+  .theme-toggle button:last-child { border-right: none; }
+  .theme-toggle button[aria-pressed="true"] {
+    background: var(--accent);
+    color: #fff;
+  }
+  .theme-toggle button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* Skip link */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    z-index: 1000;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .skip-link:focus { top: 1rem; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Focus visible for all interactive elements */
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* --- Layout: header + two equal panes --- */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .page-header {
+    grid-column: 1 / -1;
+    padding: 1.5rem 1.75rem 0;
+    margin-bottom: 0;
+  }
+
+  .content-pane {
+    overflow-y: auto;
+    padding: 1rem 1.75rem 1.5rem;
+    min-width: 0;
+  }
+
+  .map-pane {
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 1.5rem 1.75rem;
+    box-shadow: -6px 0 16px rgba(0,0,0,0.04);
+  }
+  [data-theme="dark"] .map-pane {
+    box-shadow: -6px 0 16px rgba(0,0,0,0.2);
+  }
+
+  @media (max-width: 960px) {
+    .layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr;
+      height: auto;
+    }
+    .page-header { order: 1; }
+    .map-pane {
+      order: 2;
+      max-height: none;
+      overflow-y: visible;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04), 0 -4px 12px rgba(0,0,0,0.04);
+    }
+    [data-theme="dark"] .map-pane {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 -4px 12px rgba(0,0,0,0.2);
+    }
+    .content-pane { order: 3; overflow-y: visible; }
+  }
+
+  /* --- Header --- */
+  .page-header p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+  }
+
+  .page-header h1 { font-size: 1.35rem; font-weight: 700; }
+
+  .page-header h1 { display: flex; align-items: center; gap: 0.4rem; }
+
+  .page-header {
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 1rem;
+    margin-bottom: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    z-index: 10;
+    position: relative;
+  }
+  [data-theme="dark"] .page-header {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
+
+
+  /* --- Filters + theme toggle row --- */
+  .page-header .filters {
+    margin-bottom: 0;
+  }
+  .filters-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.75rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .filters {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filters-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-right: 0.25rem;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* --- GitHub link --- */
+  .github-link {
+    color: var(--text-secondary);
+    transition: color 0.15s;
+    vertical-align: middle;
+    margin-left: 0.4rem;
+  }
+  .github-link:hover { color: var(--accent); }
+  .github-link svg { display: inline-block; vertical-align: middle; }
+
+  /* --- Map pane content --- */
+  .map-pane h2 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    padding-bottom: 0.5rem;
+    border-bottom: 3px solid var(--accent);
+    border-bottom-width: 3px;
+    display: inline-block;
+  }
+
+  .map-pane h2::after {
+    content: '';
+    display: block;
+  }
+
+  .map-graph {
+    flex: 0 0 auto;
+    min-height: 420px;
+  }
+
+  .map-graph .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  .map-graph .mermaid svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .map-graph .mermaid .nodeLabel {
+    font-family: Arial, sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+  }
+
+  .map-legend {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    border-radius: var(--radius);
+  }
+
+  .map-legend strong { color: var(--text); }
+
+  /* --- Books section in map pane --- */
+  .books-section {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    margin-top: auto;
+  }
+
+  .book-list { list-style: none; font-size: 0.82rem; }
+
+  .book-list li {
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+  }
+
+  .book-list li:last-child { border-bottom: none; }
+
+  .book-short { font-weight: 700; color: var(--text); }
+  .book-caps { font-size: 0.72rem; color: var(--text-secondary); }
+
+  /* --- Capability Cards --- */
+  .capability {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow);
+    scroll-margin-top: 1.15rem;
+    position: relative;
+  }
+
+  .capability.completed { border-color: var(--c6); }
+
+  @keyframes capability-target-glow {
+    0% {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0 rgba(0, 4, 158, 0), 0 0 0 0 rgba(0, 4, 158, 0), var(--shadow);
+      background: var(--surface);
+    }
+    20% {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(0, 4, 158, 0.12), 0 0 28px rgba(0, 4, 158, 0.2), var(--shadow);
+      background: rgba(0, 4, 158, 0.03);
+    }
+    100% {
+      border-color: var(--border);
+      box-shadow: var(--shadow);
+      background: var(--surface);
+    }
+  }
+
+  .capability.completed.is-jump-target {
+    animation: capability-target-glow 3.2s ease-out;
+  }
+
+  .capability.is-jump-target {
+    animation: capability-target-glow 3.2s ease-out;
+  }
+
+  /* Card header — always visible */
+  .cap-header {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem 1.15rem;
+    gap: 0.75rem;
+  }
+
+  .cap-number {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .cap-number.c1 { background: var(--c1-light); color: var(--c1-on-light); }
+  .cap-number.c2 { background: var(--c2-light); color: var(--c2-on-light); }
+  .cap-number.c3 { background: var(--c3-light); color: var(--c3-on-light); }
+  .cap-number.c4 { background: var(--c4-light); color: var(--c4-on-light); }
+  .cap-number.c5 { background: var(--c5-light); color: var(--c5-on-light); }
+  .cap-number.c6 { background: var(--c6-light); color: var(--c6-on-light); }
+  .cap-number.c7 { background: var(--c7-light); color: var(--c7-on-light); }
+  .cap-number.c8 { background: var(--c8-light); color: var(--c8-on-light); }
+  .cap-number.c9 { background: var(--c9-light); color: var(--c9-on-light); }
+  .cap-number.c10 { background: var(--c10-light); color: var(--c10-on-light); }
+  .cap-number.c0 { background: var(--bg); color: var(--text-secondary); border: 1.5px solid var(--border); }
+
+  .cap-header-content { flex-grow: 1; min-width: 0; }
+
+  .cap-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .cap-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    flex-grow: 1;
+  }
+
+  /* Checkbox */
+  .cap-check {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.3rem;
+    height: 1.3rem;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    background: var(--surface);
+  }
+
+  .cap-check:hover { border-color: var(--c6); }
+
+  .cap-check:checked {
+    background: var(--c6);
+    border-color: var(--c6);
+  }
+
+  .cap-check:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+  }
+
+  /* Card body — situation, changes, ready — always visible */
+  .cap-body {
+    padding: 0 1.15rem 0.75rem;
+    padding-left: calc(1.15rem + 2rem + 0.75rem); /* align with text after number */
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin: 0.75rem 0 0.3rem;
+  }
+
+  .section-label:first-child { margin-top: 0; }
+
+  .prose { font-size: 0.9rem; line-height: 1.6; }
+
+  .ready-box {
+    background: var(--green-light);
+    border-left: 3px solid var(--c6);
+    padding: 0.6rem 0.85rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 0.88rem;
+    color: var(--c6-on-light);
+    margin-top: 0.5rem;
+  }
+
+  /* --- Collapsible subsections --- */
+  .subsection { border-top: 1px solid var(--border); }
+
+  .subsection-toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.65rem 1.15rem;
+    padding-left: calc(1.15rem + 2rem + 0.75rem);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    gap: 0.4rem;
+    text-align: left;
+  }
+
+  .subsection-toggle:hover { color: var(--text); }
+
+  .subsection-chevron {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+    fill: currentColor;
+  }
+
+  .subsection[aria-expanded="true"] .subsection-chevron { transform: rotate(90deg); }
+
+  .subsection-count {
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+  }
+
+  .subsection-body {
+    display: none;
+    padding: 0 1.15rem 0.85rem;
+    padding-left: calc(1.15rem + 2rem + 0.75rem);
+  }
+
+  .subsection[aria-expanded="true"] .subsection-body { display: block; }
+
+  /* --- Resource Cards --- */
+  .resources { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .resource {
+    display: flex;
+    gap: 0.65rem;
+    padding: 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    align-items: flex-start;
+  }
+
+  .resource:hover { border-color: var(--accent); }
+  .resource.hidden { display: none; }
+
+  .format-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .format-badge.video { background: var(--c1-light); color: var(--c1-on-light); }
+  .format-badge.article { background: var(--c6-light); color: var(--c6-on-light); }
+  .format-badge.podcast { background: var(--c4-light); color: var(--c4-on-light); }
+  .format-badge.guide { background: var(--c5-light); color: var(--c5-on-light); }
+  .format-badge.research { background: var(--c2-light); color: var(--c2-on-light); }
+  .format-badge.book { background: var(--c3-light); color: var(--c3-on-light); }
+
+  .resource-info { flex-grow: 1; min-width: 0; }
+
+  .resource-title { font-weight: 600; font-size: 0.88rem; }
+
+  .resource-title a { color: var(--text); text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; }
+  .resource-title a:hover { text-decoration-color: var(--accent); color: var(--accent); }
+
+  .resource-author { font-size: 0.78rem; color: var(--text-secondary); }
+  .resource-desc { font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem; }
+  .resource-time { font-size: 0.75rem; color: var(--text-secondary); flex-shrink: 0; white-space: nowrap; margin-top: 0.15rem; }
+
+  /* --- Practice box --- */
+  .practice-box {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    padding: 0.6rem 0.85rem;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 0.88rem;
+    color: var(--accent-on-light);
+  }
+
+  /* --- Footer --- */
+  footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.3rem 0.7rem;
+    font-size: 0.72rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .content-pane { padding: 0.75rem; }
+    .map-pane { padding: 1rem; }
+    .cap-body, .subsection-toggle, .subsection-body { padding-left: 0.75rem; }
+    .resource { flex-wrap: wrap; }
+    .resource-time { width: 100%; margin-top: 0.2rem; }
+    .page-header h1 { font-size: 1.15rem; }
+    .page-header p { font-size: 0.8rem; }
+    .page-header { padding: 0.75rem 0.75rem 0; }
+    .filters { gap: 0.3rem; }
+    .filter-btn { padding: 0.25rem 0.55rem; font-size: 0.72rem; }
+    .theme-toggle button { padding: 0.25rem 0.55rem; font-size: 0.72rem; }
+    .cap-header { gap: 0.5rem; }
+    .cap-number { width: 32px; height: 32px; font-size: 0.85rem; }
+    .cap-title { font-size: 0.95rem; }
+    .section-label { font-size: 0.65rem; }
+    .prose { font-size: 0.85rem; }
+    .subsection-toggle { font-size: 0.8rem; }
+    footer { font-size: 0.7rem; flex-wrap: wrap; gap: 0.5rem; }
+    .github-link svg { width: 18px; height: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<div class="layout">
+  <header class="page-header" id="main-content">
+    <h1>Rails Capability Map <a href="https://github.com/cristoslc/rails-capability-map" class="github-link" aria-label="View source on GitHub" title="View source on GitHub"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg></a></h1>
+    <p>A capability-based learning map for modern Ruby on Rails — core conventions through AI-assisted shipping, current to Rails 8.x. Each capability has a situation, curated resources, and a practice exercise. Start with <strong>Capability 1</strong> or jump to whatever your project needs most.</p>
+    <div class="filters-row">
+      <nav class="filters" aria-label="Filter resources by format">
+        <span class="filters-label" id="filter-label">Show:</span>
+        <button class="filter-btn" aria-pressed="true" data-filter="all" aria-describedby="filter-label">All</button>
+        <button class="filter-btn" aria-pressed="false" data-filter="video" aria-describedby="filter-label">Video</button>
+        <button class="filter-btn" aria-pressed="false" data-filter="article" aria-describedby="filter-label">Article</button>
+        <button class="filter-btn" aria-pressed="false" data-filter="podcast" aria-describedby="filter-label">Podcast</button>
+        <button class="filter-btn" aria-pressed="false" data-filter="book" aria-describedby="filter-label">Book</button>
+      </nav>
+      <div class="theme-toggle" role="group" aria-label="Theme preference">
+        <button data-theme-btn="day" aria-pressed="false">Day</button>
+        <button data-theme-btn="night" aria-pressed="false">Night</button>
+        <button data-theme-btn="auto" aria-pressed="true">Auto</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="content-pane" role="main">
+
+    <div id="capabilities" role="list" aria-label="Capabilities"></div>
+
+    <footer>
+      <span>Rails Capability Map &mdash; October 2026 &middot; <a href="https://github.com/cristoslc/rails-capability-map" style="color: var(--accent);">Source on GitHub</a></span>
+      <button class="reset-btn" onclick="resetProgress()" aria-label="Reset all progress">Reset progress</button>
+    </footer>
+  </main>
+
+  <aside class="map-pane" aria-label="Capability map and reference">
+    <h2>How they connect</h2>
+    <div class="map-graph" id="capability-graph">
+<pre class="mermaid">
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#eef0fa',
+    'primaryBorderColor': '#00049E',
+    'primaryTextColor': '#00049E',
+    'lineColor': '#706F6F',
+    'fontSize': '13px',
+    'fontFamily': 'Arial, sans-serif',
+    'edgeLabelBackground': '#ffffff'
+  }
+}}%%
+graph TD
+    C1["1. Rails Core & Conventions"]
+    C2["2. Active Record & Data"]
+    C3["3. Hotwire Frontend"]
+    C4["4. Background Jobs"]
+    C5["5. Security & Auth"]
+    C6["6. Testing"]
+    C7["7. Growing the Codebase"]
+    C8["8. Ship & Operate"]
+    C9["9. Performance"]
+    C10["10. AI Partner"]:::alongside
+
+    C1 --> C2
+    C1 --> C3
+    C2 --> C4
+    C2 --> C7
+    C2 --> C9
+    C3 --> C4
+    C4 --> C8
+    C5 --> C6
+    C6 --> C7
+    C7 --> C8
+    C8 --> C9
+
+    classDef default fill:#eef0fa,stroke:#00049E,stroke-width:2px,color:#00049E,font-weight:700,rx:20,ry:20
+    classDef alongside fill:#f8f8f8,stroke:#706F6F,stroke-width:1.5px,stroke-dasharray:5 4,color:#4a4a49,font-weight:600,rx:20,ry:20
+
+    style C2 fill:#e6f7f7,stroke:#006b6b,color:#005555
+    style C3 fill:#ededfc,stroke:#1a1f99,color:#1a1f99
+    style C4 fill:#e6f4fa,stroke:#00698f,color:#005a7a
+    style C5 fill:#f2f0f8,stroke:#5a4a8a,color:#4a3d75
+    style C6 fill:#edf7f1,stroke:#2d7a4a,color:#1f6338
+    style C7 fill:#fef3e6,stroke:#8a4500,color:#6b3600
+    style C8 fill:#f2e6e9,stroke:#8a1538,color:#6b0f2a
+    style C9 fill:#f8edf4,stroke:#7a2d5a,color:#5e1d45
+</pre>
+<!-- old SVG nodes removed - Mermaid handles rendering now -->
+</svg>
+    </div>
+
+    <div class="map-legend">
+<strong>1. Rails Core &amp; Conventions</strong> is the gateway, feeding <strong>2. Active Record &amp; Data</strong> — the foundation for the <strong>3. Hotwire frontend</strong>, <strong>4. Background Jobs</strong>, and <strong>9. Performance</strong>, which all build on the data layer. <strong>5. Security &amp; Auth</strong> pairs with <strong>6. Testing</strong> — the correctness pair — and testing in turn feeds <strong>7. Growing the Codebase</strong> (you can only refactor what tests protect). <strong>7</strong> feeds <strong>8. Ship &amp; Operate</strong>, which closes the loop back into <strong>9. Performance</strong> in production. <strong>10. AI Partner</strong> is a force multiplier across all of it.
+    </div>
+
+    <div class="books-section">
+      <h2>Books (O'Reilly Learning)</h2>
+      <p class="sidebar-note" style="margin-bottom:0.5rem;">Specific chapters are linked in each capability&rsquo;s Go Deeper section.</p>
+      <ul class="book-list">
+        <li><em>Agile Web Development with Rails 8</em> &mdash; Sam Ruby &amp; Dave Thomas</li>
+        <li><em>The Rails and Hotwire Codex</em> &mdash; Ayush Newatia</li>
+        <li><em>Layered Design for Ruby on Rails Applications</em> &mdash; Vladimir Dementyev</li>
+        <li><em>Rails Scales!</em> &mdash; Cristian Planas</li>
+        <li><em>High Performance PostgreSQL for Rails</em> &mdash; Andrew Atkinson</li>
+        <li><em>Hotwire Native for Rails Developers</em> &mdash; Joe Masilotti</li>
+        <li><em>Programming Ruby (5th ed., 'The Pickaxe')</em> &mdash; Noel Rappin &amp; Dave Thomas</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script>
+const DATA =
+[
+  {
+    "id": 1,
+    "cls": "c1",
+    "title": "Master the Rails Core & Its Conventions",
+    "situation": "You're an experienced engineer — but Rails is new, or has been for a while. Someone hands you a Rails 8 codebase, or you're evaluating Rails for a client project and getting opinions from 2013. Convention-over-configuration is either the thing that makes Rails feel magical or arbitrary, depending on whether you've internalized the mental model.",
+    "changes": "Treat conventions as a design system, not magic. You learn the request lifecycle cold — router → controller → model → view — and what each layer owns. You learn what the generators emit and why, how the directory encodes responsibility, and the Ruby idioms Rails is built on. Suddenly any Rails repo — including the framework source itself — is readable in minutes, and the 'Rails Way' becomes a set of predictable decisions rather than folklore.",
+    "ready": "You can trace any request through a Rails app and name what each layer does and doesn't own. You can scaffold a resource and explain every generated file. You can open an unfamiliar Rails codebase and orient yourself without asking anyone.",
+    "practice": "Spin up a fresh Rails 8 app. Build one small resource end to end — say, a Maine coffee-shop catalog with a form — using only generators and manual edits. Then write out (on paper) the full lifecycle of one POST request: URL, route match, controller action, params, model save, redirect, and every file involved.",
+    "startResources": [
+      {
+        "title": "Getting Started — The Official Rails Guide",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/getting_started.html",
+        "format": "article",
+        "time": "45 min",
+        "desc": "The canonical first app, end to end. Current to Rails 8.x and maintained by the Rails Foundation. Do this even as a senior dev — every generated file is explained."
+      },
+      {
+        "title": "Rails Routing from the Outside In",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/routing.html",
+        "format": "article",
+        "time": "35 min",
+        "desc": "Routing is the front door of the convention system: RESTful defaults, resources, namespacing, and the params flow controllers receive."
+      },
+      {
+        "title": "The Rails Command Line",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/command_line.html",
+        "format": "article",
+        "time": "15 min",
+        "desc": "Generators, rake tasks, and bin/ scripts — the tooling that makes conventions tangible."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "Action Controller Overview",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/action_controller_overview.html",
+        "format": "article",
+        "time": "40 min",
+        "desc": "The layer where conventions meet your code: params filtering, callbacks, responder defaults, and Strong Parameters."
+      },
+      {
+        "title": "Agile Web Development with Rails 8",
+        "author": "Sam Ruby & Dave Thomas",
+        "url": "https://pragprog.com/titles/rails8/agile-web-development-with-rails-8/",
+        "format": "book",
+        "time": "~8 hrs",
+        "desc": "The book Rails is itself tested against — a full production-style store app on Rails 8, written in consultation with the core team."
+      },
+      {
+        "title": "Ruby on Rails Tutorial (online edition)",
+        "author": "Michael Hartl",
+        "url": "https://www.railstutorial.org/book",
+        "format": "book",
+        "time": "20+ hrs",
+        "desc": "The classic TDD-first deep tutorial. The online version tracks current Rails releases; best when you want test-driven depth, not just breadth."
+      },
+      {
+        "title": "Programming Ruby (5th ed., 'The Pickaxe')",
+        "author": "Noel Rappin & Dave Thomas",
+        "url": "https://pragprog.com/titles/ruby5/programming-ruby-3-3-5th-edition",
+        "format": "book",
+        "time": "~15 hrs",
+        "desc": "The definitive Ruby language reference. Rails fluency is Ruby fluency — this is the companion to keep on the desk."
+      },
+      {
+        "title": "Rails 8: 'No PaaS Required'",
+        "author": "DHH / rubyonrails.org",
+        "url": "https://rubyonrails.org/2024/9/27/rails-8-beta1-no-paas-required",
+        "format": "article",
+        "time": "10 min",
+        "desc": "The 2024 announcement framing modern Rails: the Solid trifecta, built-in auth, Kamal 2, Thruster. Reads the current Rails thesis in one sitting."
+      },
+      {
+        "title": "Rails World 2024 Opening Keynote",
+        "author": "DHH (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/opening-keynote-rails-world-2024",
+        "format": "video",
+        "time": "50 min",
+        "desc": "DHH ships the Rails 8 beta live and makes the one-person-framework case. Watch after the announcement post to see the philosophy in motion."
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "cls": "c2",
+    "title": "Model Data with Active Record & the Database",
+    "situation": "Active Record is where Rails apps live or die. Queries grow mysterious, N+1s creep in, callbacks tangle domain logic, and nobody remembers which index backs which association. Schema decisions made casually in month one cost quarters to fix.",
+    "changes": "You learn Active Record as a pattern library over SQL, not an ORM to fight. Associations are query trees; validations are a boundary layer; callbacks are a sharp tool with few correct uses; the relation API is a composable SQL builder you can always interrogate with <code>to_sql</code> and <code>EXPLAIN ANALYZE</code>. Migrations become a deliberate discipline — especially the zero-downtime patterns — and the schema becomes something you design, not something that happens.",
+    "ready": "Given a domain, you can design a schema with the right associations, foreign keys, and indexes; predict the SQL any query chain emits; recognize callback abuse and reach for the right alternative (model split, service object, or straight SQL); and ship a migration against a live table without locking it.",
+    "practice": "Design the schema for a small multi-actor domain (e.g., clinic scheduling with patients, providers, and appointments). Write the SQL five query chains generate, run each through EXPLAIN ANALYZE on seeded data, and add the indexes (and counter caches/find_by optimizations) the plans demand.",
+    "startResources": [
+      {
+        "title": "Active Record Query Interface",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/active_record_querying.html",
+        "format": "article",
+        "time": "45 min",
+        "desc": "The relation API, eager loading (includes/eager_load/preload), scopes, and how each chain compiles to SQL. The single most-consulted Rails guide."
+      },
+      {
+        "title": "Active Record Associations",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/association_basics.html",
+        "format": "article",
+        "time": "40 min",
+        "desc": "belongs_to/has_many/has_many :through semantics, the options that matter, and common misuses."
+      },
+      {
+        "title": "Active Record Migrations",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/active_record_migrations.html",
+        "format": "article",
+        "time": "30 min",
+        "desc": "Schema evolution as code: migration anatomy, reference columns with real FKs, and the safety rails around destructive changes."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "High Performance PostgreSQL for Rails",
+        "author": "Andrew Atkinson",
+        "url": "https://pragprog.com/titles/aapsql/high-performance-postgresql-for-rails/",
+        "format": "book",
+        "time": "~12 hrs",
+        "desc": "The definitive database book for modern Rails: indexing, EXPLAIN, zero-downtime migrations, partitioning, read/write splitting. PostgreSQL 16 / Rails 7.1+ throughout."
+      },
+      {
+        "title": "Layered Design for Ruby on Rails Applications",
+        "author": "Vladimir Dementyev",
+        "url": "https://pragprog.com/titles/npalka8/layered-design-for-ruby-on-rails-applications",
+        "format": "book",
+        "time": "~10 hrs",
+        "desc": "Where does logic live? Models, services, form objects, and view layers on Rails 7+ — the best current book on organizing Rails application layers."
+      },
+      {
+        "title": "Active Record Validations",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/active_record_validations.html",
+        "format": "article",
+        "time": "25 min",
+        "desc": "Validation as a boundary discipline: declarative rules, context-dependent validations, and the DB constraints that back them up."
+      },
+      {
+        "title": "Bullet — the N+1 hunt is automated",
+        "author": "flyerhzm",
+        "url": "https://github.com/flyerhzm/bullet",
+        "format": "guide",
+        "time": "10 min",
+        "desc": "Watch your dev/test suite for N+1 queries and unused eager loading — and fail CI on them. Retrofit onto any app in ten minutes."
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "cls": "c3",
+    "title": "Build the Frontend with Hotwire: HTML Over the Wire",
+    "situation": "The client says 'modern frontend' and means React. Rails' answer — Turbo plus Stimulus sending HTML over the wire — is both the framework's default and its biggest reframe. You need to know what Hotwire actually does, where it shines, and when to genuinely reach for an SPA.",
+    "changes": "The mental model clicks: the server remains the owner of state; it sends HTML fragments. Turbo Drive intercepts navigation and forms; Turbo Frames swap targeted DOM regions; Turbo Streams push changes over SSE/WebSocket for live updates and broadcasts. Stimulus ties behavior to server-rendered markup with data attributes. You stop designing a JSON API for your own UI and let HTML be the interface — and you can articulate the honest cases where React still wins.",
+    "ready": "You can build CRUD with live updates and zero client state; explain Drive vs Frames vs Streams and when Streams is overkill; keep logic in Stimulus controllers and the server; and defend the Hotwire architecture (and its limits) to an SPA-minded team.",
+    "practice": "Add live search-as-you-type and instant delete to the Cap 2 catalog: search via Turbo Frame, deletion via Turbo Stream broadcast, focus management and stateful bits via Stimulus controllers. Then rewrite one screen deliberately against Rails (e.g., optimistic updates or a rich editor) and document why.",
+    "startResources": [
+      {
+        "title": "Turbo Handbook — Introduction",
+        "author": "Hotwire",
+        "url": "https://turbo.hotwired.dev/handbook/introduction",
+        "format": "guide",
+        "time": "45 min",
+        "desc": "The source-of-truth handbook: Drive, Frames, Streams, and the 'HTML over the wire' model they share."
+      },
+      {
+        "title": "Stimulus Handbook",
+        "author": "Hotwire",
+        "url": "https://stimulus.hotwired.dev/handbook/introduction",
+        "format": "guide",
+        "time": "40 min",
+        "desc": "Progressive enhancement, targets/actions/values, and how behavior attaches to server-rendered HTML without a client framework."
+      },
+      {
+        "title": "Hotwire Demystified (keynote)",
+        "author": "Chris Oliver — Tropical on Rails 2025 (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/keynote-hotwire-demystified",
+        "format": "video",
+        "time": "60 min",
+        "desc": "The clearest current talk on when Drive vs Frames vs Streams each fit — 'let your HTML guide your JavaScript' — from GoRails' Chris Oliver."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "The Rails and Hotwire Codex",
+        "author": "Ayush Newatia",
+        "url": "https://rubyandrails.info/books/the-rails-and-hotwire-codex",
+        "format": "book",
+        "time": "~20 hrs",
+        "desc": "900+ pages of production-grade Rails + Hotwire: auth from scratch, every Action* sub-framework, Turbo Native apps, PostgreSQL search. The reference for 'how real modern Rails apps are built.'"
+      },
+      {
+        "title": "Hotwire Native for Rails Developers",
+        "author": "Joe Masilotti",
+        "url": "https://masilotti.com/hotwire-native-for-rails-developers/",
+        "format": "book",
+        "time": "~8 hrs",
+        "desc": "Ship native iOS/Android shells around your Rails app without an API — the official path to mobile without a separate stack."
+      },
+      {
+        "title": "Action Cable Overview",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/action_cable_overview.html",
+        "format": "article",
+        "time": "25 min",
+        "desc": "WebSockets under Turbo Streams: channels, connections, Solid Cable as the default adapter in Rails 8, and broadcasting from models and callbacks."
+      },
+      {
+        "title": "The Great Mobile Hack: Hotwire Native",
+        "author": "Daniel Medina (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/the-great-mobile-hack-hotwire-native",
+        "format": "video",
+        "time": "40 min",
+        "desc": "A conference's own web app turned into a native mobile app — a concrete end-to-end Hotwire Native story."
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "cls": "c4",
+    "title": "Move Work Off-Request: Background Jobs & Async",
+    "situation": "Emails, exports, webhooks, integrations, scheduled work — the slow stuff that can't live in the request cycle. Sidekiq + Redis was the default stack for a decade; Rails 8 makes Solid Queue (database-backed, Redis-free) the default. Teams carry over either Redis folklore or Sidekiq muscle memory that doesn't map.",
+    "changes": "You judge job systems by durability and operations, not throughput mythology. Active Job is the portable abstraction — but you learn its serialization limits and what it does and doesn't normalize away. You design idempotent, retryable jobs, choose adapters per workload, and operate queues as production infrastructure: monitoring, backlogs, poison-job recovery. The Redis-vs-Solid decision becomes an articulated trade-off instead of inherited default.",
+    "ready": "You can defend an adapter choice per workload; write jobs that survive worker restarts and duplicate delivery; schedule recurring work; and keep an eye on queue health (mission-control dashboards, alerting on backlog) without Redis in the stack.",
+    "practice": "Take a synchronous flow from Cap 2 — upload → process → notify — and move it to Active Job on Solid Queue with retries and idempotency keys. Then kill a worker mid-job and verify nothing is lost or double-applied.",
+    "startResources": [
+      {
+        "title": "Active Job Basics",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/active_job_basics.html",
+        "format": "article",
+        "time": "30 min",
+        "desc": "Job anatomy, queueing, retries and exception handling, and the adapter story — including Solid Queue as the Rails 8 default."
+      },
+      {
+        "title": "Introducing Solid Queue",
+        "author": "37signals",
+        "url": "https://dev.37signals.com/introducing-solid-queue/",
+        "format": "article",
+        "time": "10 min",
+        "desc": "Why 37signals built a database-backed queue to replace Redis: design goals, durability model, and the reasoning behind the default switch."
+      },
+      {
+        "title": "Solid Queue (Kaigi on Rails)",
+        "author": "Shinichi Maeshima (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/solid-queue",
+        "format": "video",
+        "time": "30 min",
+        "desc": "A history of Rails background workers plus a Sidekiq-vs-Solid comparison framework — the fastest way to build your own selection criteria."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "Mission Control: Jobs",
+        "author": "Basecamp",
+        "url": "https://github.com/basecamp/mission_control-jobs",
+        "format": "guide",
+        "time": "15 min",
+        "desc": "Production dashboards for Solid Queue/Solid Error: queue inspection, retries, discard. The observability half of the job decision."
+      },
+      {
+        "title": "Rails Scales! (background work chapters)",
+        "author": "Cristian Planas",
+        "url": "https://pragprog.com/titles/cprpo/rails-scales/",
+        "format": "book",
+        "time": "~30 min",
+        "desc": "Where jobs bite at scale — queue backpressure, priority lanes, and keeping the request cycle skinny — from the Zendesk tech lead who tunes giant Rails apps for a living."
+      },
+      {
+        "title": "Agile Web Development with Rails 8 (job chapters)",
+        "author": "Sam Ruby & Dave Thomas",
+        "url": "https://pragprog.com/titles/rails8/agile-web-development-with-rails-8/",
+        "format": "book",
+        "time": "~60 min",
+        "desc": "Active Job and integration patterns inside the canonical Rails 8 build."
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "cls": "c5",
+    "title": "Secure the App: Auth, Authorization & Safe Defaults",
+    "situation": "Rails 8 ships an authentication generator and leaves authorization out on purpose. The pre-2024 habits — bolt on Devise, sprinkle admin flags, hope — don't hold up in a codebase where the auth code is now yours. Meanwhile the actual security surface (sessions, params, CSRF, secrets, mass assignment) is bigger than the login form.",
+    "changes": "Authentication and authorization split cleanly in your head: Rails 8's <code>bin/rails g authentication</code> gives you a minimal, auditable authN starting point you're expected to extend; authZ is a policy layer (Pundit, ActionPolicy) you design for your domain. You learn the Rails security defaults you're trusting — encrypted cookie sessions, CSRF tokens, Strong Parameters — plus the gaps: rate limiting, secure headers, secrets management, and continuous scanning with Brakeman.",
+    "ready": "You can generate, read, and extend a Rails 8 auth stack (registrations, password reset, 2FA) without a gem; write policy classes that cover a multi-role domain and enforce them in controllers and views; pass a clean Brakeman audit; and write a one-page threat model naming what you trust and why.",
+    "practice": "Build auth from the generator for the Cap 2 app; add role-based policies with Pundit (or ActionPolicy); run Brakeman + a dependency audit, fix everything it raises, and write the one-page threat model for the session flow.",
+    "startResources": [
+      {
+        "title": "The State of Security in Rails 8",
+        "author": "Greg Molnar (Rails World 2024)",
+        "url": "https://greg.molnar.io/blog/the-state-of-security-in-rails-8/",
+        "format": "article",
+        "time": "20 min",
+        "desc": "The Rails World talk in written form: the auth generator, what it does and doesn't cover, and Rails 8's security posture."
+      },
+      {
+        "title": "Securing Rails Applications (the Security Guide)",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/security.html",
+        "format": "article",
+        "time": "45 min",
+        "desc": "Sessions, CSRF, XSS, mass assignment, secure headers, SSL, secrets — the framework's official security doctrine in one guide."
+      },
+      {
+        "title": "Rails 8 Adds a Built-in Authentication Generator",
+        "author": "Saeloun Blog",
+        "url": "https://blog.saeloun.com/2025/05/12/rails-8-adds-built-in-authentication-generator/",
+        "format": "article",
+        "time": "10 min",
+        "desc": "What <code>rails g authentication</code> emits (sessions, password reset, has_secure_password, rate limiting) and what you must add yourself."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "Pundit — policy-object authorization",
+        "author": "Varvet",
+        "url": "https://github.com/varvet/pundit",
+        "format": "guide",
+        "time": "30 min",
+        "desc": "Simple policy classes per model, scopes for listing, and how it composes with <code>Current.user</code> from the Rails 8 generator. Contrast with ActionPolicy and CanCanCan before choosing."
+      },
+      {
+        "title": "Brakeman — static security scanning",
+        "author": "PresidentBeef",
+        "url": "https://github.com/presidentbeef/brakeman",
+        "format": "guide",
+        "time": "15 min",
+        "desc": "Rails-specific static analysis for injection, unsafe redirects, dynamic evals. Run it in CI from day one."
+      },
+      {
+        "title": "Rails Security Best Practices: A Comprehensive Guide",
+        "author": "Saeloun Blog",
+        "url": "https://blog.saeloun.com/2026/04/28/rails-security-best-practices-a-comprehensive-guide/",
+        "format": "article",
+        "time": "25 min",
+        "desc": "The full checklist across Rails 7→8.1: auth generator, params.expect, local CI security checks, and where authorization deliberately stays out of core."
+      },
+      {
+        "title": "OWASP Cheat Sheet Series",
+        "author": "OWASP",
+        "url": "https://cheatsheetseries.owasp.org/",
+        "format": "guide",
+        "time": "browse",
+        "desc": "When your threat model goes past Rails defaults — auth, sessions, secrets, API tokens — the cross-framework discipline lives here."
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "cls": "c6",
+    "title": "Test It: The Safety Net That Buys Freedom",
+    "situation": "A Rails app without a trustworthy suite is a codebase you can only fear-change. Rails ships batteries included — Minitest, request/integration specs, system tests over a real browser, fixtures and factories — and Rails 8.1 adds local CI. The question is not whether to test but what each level should protect.",
+    "changes": "You adapt the testing pyramid to Rails reality: model and request specs as the load-bearing layer, a small set of system tests guarding key user flows, factories over fixtures, and deterministic state management as a first-class concern. Flaky tests get diagnosed (ordering, time zones, async races) rather than retried into oblivion. The suite's runtime becomes a design pressure, and with local CI the pre-push loop finally has no excuse.",
+    "ready": "Your suite is green under ~10 minutes with fast feedback; request specs cover every endpoint, a handful of system tests guard real flows; CI is deterministic and flake free; you trust the suite enough to refactor the models underneath it.",
+    "practice": "Retrofit tests onto a legacy Rails controller: write request specs for each route, then one system test of the full user flow. Introduce a deliberate data race and watch randomized ordering catch it — then fix the test's hidden coupling.",
+    "startResources": [
+      {
+        "title": "Testing Rails Applications (the Testing Guide)",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/testing.html",
+        "format": "article",
+        "time": "45 min",
+        "desc": "The official map: what Rails generates for tests, request vs integration vs system, fixtures, and the built-in helpers."
+      },
+      {
+        "title": "How We Test Rails Applications",
+        "author": "thoughtbot",
+        "url": "https://thoughtbot.com/blog/how-we-test-rails-applications",
+        "format": "article",
+        "time": "25 min",
+        "desc": "A mature team's complete testing philosophy — factories, system tests, request specs as the workhorse — from the makers of FactoryBot and RSpec ecosystem staples."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "Flaky Tests, Be Gone",
+        "author": "Evil Martians",
+        "url": "https://evilmartians.com/chronicles/flaky-tests-be-gone-long-lasting-relief-chronic-ci-retry-irritation",
+        "format": "article",
+        "time": "30 min",
+        "desc": "Ordering, time, transactional tests, and the quarantine discipline — the single best writeup on making test suites deterministic."
+      },
+      {
+        "title": "Layered Design for Ruby on Rails Applications (testing chapters)",
+        "author": "Vladimir Dementyev",
+        "url": "https://pragprog.com/titles/npalka8/layered-design-for-ruby-on-rails-applications",
+        "format": "book",
+        "time": "~60 min",
+        "desc": "Testing each application layer in isolation — models, services, views, system — as an architecture concern, not just a habit."
+      },
+      {
+        "title": "Ruby on Rails Tutorial — the TDD chapters",
+        "author": "Michael Hartl",
+        "url": "https://www.railstutorial.org/book",
+        "format": "book",
+        "time": "20+ hrs (relevant chapters)",
+        "desc": "Red-green-refactor practiced live across a growing app: integration tests, login-protected pages, Capybara system tests. The best full-course TDD education for Rails."
+      },
+      {
+        "title": "RailsConf 2025 talk index",
+        "author": "RubyEvents",
+        "url": "https://www.rubyevents.org/events/railsconf-2025",
+        "format": "video",
+        "time": "browse",
+        "desc": "Current-condition conference talks including testing and flake war stories from teams running large Rails suites."
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "cls": "c7",
+    "title": "Grow the Codebase: Architecture Without Microservices",
+    "situation": "The codebase is three years old and the fat-model era shows: controllers with business logic, callbacks with side effects, no seams. Rails' answer is emphatically not a service fleet — 'extraction' here means layering (POROs, form/query objects, ViewComponents), modular monoliths (engines, pack-werk), and knowing exactly when a module should become a service.",
+    "changes": "You can reason about where logic belongs in a Rails app — and defend it — using the layered-model vocabulary: plain Ruby objects at domain seams instead of God objects. You know the modular monolith toolkit (engines, Packwerk) and its honest critique: boundary tools prevent new coupling but don't fix design or organization. You can evaluate extract-vs-keep decisions with evidence instead of aesthetics, and when extraction is right, you know what good looks like in both worlds.",
+    "ready": "Given a large Rails app, you can map its module seams and coupling hot spots; design a bounded modularization (or argue against one) with an ADR-style note; and extract one well-bounded domain (service, engine, or query object layer) without breaking the monolith's advantages.",
+    "practice": "Pick the fattest controller or model in a large Rails app (yours or a well-known open-source one). Extract one seam: a query object, a service object, or a ViewComponent. Then write an ADR-style note: what boundary you created, why you did NOT extract a service, and what Packwerk rule (if any) enforces it.",
+    "startResources": [
+      {
+        "title": "The Majestic Monolith",
+        "author": "DHH / 37signals",
+        "url": "https://m.signalvnoise.com/the-majestic-monolith/",
+        "format": "article",
+        "time": "10 min",
+        "desc": "The original articulation of Rails' architectural default — and the philosophy behind why the one-person (and one-hundred-person) framework stays single-deploy."
+      },
+      {
+        "title": "Modularizing Rails Monoliths One Bite at a Time",
+        "author": "Marc Reynolds / Doximity",
+        "url": "https://technology.doximity.com/articles/modularizing-rails-monoliths-one-bite-at-a-time",
+        "format": "article",
+        "time": "25 min",
+        "desc": "A real team's phased Packwerk modularization — boundaries, enforcement, and what it did and didn't buy them."
+      },
+      {
+        "title": "The Myth of the Modular Monolith (EuRuKo 2025 closing keynote)",
+        "author": "Eileen M. Uchitelle (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/closing-keynote-the-myth-of-the-modular-monolith",
+        "format": "video",
+        "time": "45 min",
+        "desc": "The essential counterweight, from a Rails core team alum with Shopify/GitHub/37signals scar tissue: most modularization pains are human and organizational, and tools like Packwerk can't fix that. Decide with both talks in mind."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "Under Deconstruction: The State of Shopify's Monolith",
+        "author": "Shopify Engineering",
+        "url": "https://shopify.engineering/shopify-monolith",
+        "format": "article",
+        "time": "30 min",
+        "desc": "One of the largest Rails codebases ever, on engines, Packwerk, SOLID at component scale, and the developer-behavior realities of modularization."
+      },
+      {
+        "title": "Packwerk",
+        "author": "Shopify",
+        "url": "https://github.com/Shopify/packwerk",
+        "format": "guide",
+        "time": "20 min",
+        "desc": "The dependency-enforcement gem: packages, dependency declarations, and violation gates in CI."
+      },
+      {
+        "title": "Layered Design for Ruby on Rails Applications",
+        "author": "Vladimir Dementyev",
+        "url": "https://pragprog.com/titles/npalka8/layered-design-for-ruby-on-rails-applications",
+        "format": "book",
+        "time": "~10 hrs",
+        "desc": "The architectural vocabulary for where logic lives — the strongest current book-length treatment of Rails application layering."
+      },
+      {
+        "title": "RailsConf 2025 talk index",
+        "author": "RubyEvents",
+        "url": "https://www.rubyevents.org/events/railsconf-2025",
+        "format": "video",
+        "time": "browse",
+        "desc": "Multiple current talks on monolith growth, modularization stories, and scaling orgs on shared codebases."
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "cls": "c8",
+    "title": "Ship & Operate: Kamal + the Zero-Dependency Production Stack",
+    "situation": "Heroku-era Rails muscle memory says deploys need a PaaS bill and production needs a Redis cluster. Rails 8's thesis is the opposite: Kamal 2 + Kamal Proxy for zero-downtime deploys on any plain VPS, Propshaft for assets, Thruster as the app-level proxy, and the Solid trifecta (Cache, Queue, Cable) replacing Redis entirely — your app needs one machine and Postgres.",
+    "changes": "You can run production deploys yourself: Kamal turns any server into an app host with zero-downtime releases via its proxy, rolling deploys, and access bridging — no Heroku, no Kubernetes, no yak-shave. You can articulate the Solid trifecta trade-offs (SQLite vs MySQL/Postgres adapters, durability, latency) against a Redis deployment. You know Thruster, Propshaft, and Mission Control, plus the ops hygiene — backups, logs, observability — that running it yourself now makes yours.",
+    "ready": "One command boots your app on a fresh VPS with zero-downtime deploy, HTTPS via proxy, and the Solid stack — no Redis, no PaaS. You can explain each Solid swap's trade-offs per workload, roll back a bad release, and restore from backup.",
+    "practice": "Deploy the Cap 2–4 app to a $5 VPS with Kamal + Postgres + the Solid trifecta. Run a zero-downtime deploy while hammering the app with a load script, then purposefully roll back a bad release and restore a backup.",
+    "startResources": [
+      {
+        "title": "Rails 8: 'No PaaS Required'",
+        "author": "DHH / rubyonrails.org",
+        "url": "https://rubyonrails.org/2024/9/27/rails-8-beta1-no-paas-required",
+        "format": "article",
+        "time": "10 min",
+        "desc": "The manifesto: Kamal 2, Thruster, Solid trifecta, and built-in auth as the new default production stack."
+      },
+      {
+        "title": "Kamal — Introduction & Docs",
+        "author": "37signals",
+        "url": "https://kamal-deploy.org/docs/introduction",
+        "format": "guide",
+        "time": "30 min",
+        "desc": "Deploy-anywhere Docker tooling: config, proxy, zero-downtime releases, and the commands you'll actually run."
+      },
+      {
+        "title": "Rails World 2024 Opening Keynote",
+        "author": "DHH (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/opening-keynote-rails-world-2024",
+        "format": "video",
+        "time": "50 min",
+        "desc": "The full stack shipped live, from Solid Queue to Kamal Proxy — the fastest orientation to why these tools exist and how they compose."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "Kamal 2: Why and How You Should Leave the Cloud",
+        "author": "Guillaume Briday (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/kamal",
+        "format": "video",
+        "time": "25 min",
+        "desc": "IaaS-vs-PaaS economics, server hardening, and a Kamal 2 deploy walkthrough from the community's most prolific Kamal speaker."
+      },
+      {
+        "title": "Mission Control: Jobs — operate Solid Queue",
+        "author": "Basecamp",
+        "url": "https://github.com/basecamp/mission_control-jobs",
+        "format": "guide",
+        "time": "15 min",
+        "desc": "Queue health, retries, and failed-job triage in production — the operations console that pairs with the Solid trifecta."
+      },
+      {
+        "title": "Thruster — the app server proxy",
+        "author": "Basecamp",
+        "url": "https://github.com/basecamp/thruster",
+        "format": "guide",
+        "time": "10 min",
+        "desc": "X-Accel-Buffering, static asset serving, HTTP/2 — what Thruster buys you between Kamal Proxy and Puma, and when you need it."
+      },
+      {
+        "title": "Rails Scales! (production operations chapters)",
+        "author": "Cristian Planas",
+        "url": "https://pragprog.com/titles/cprpo/rails-scales/",
+        "format": "book",
+        "time": "~90 min",
+        "desc": "Monitoring, budgets, and product limits applied to real Rails production systems — the discipline that comes after 'kamal deploy' goes green."
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "cls": "c9",
+    "title": "Make It Fast: Performance That Survives Growth",
+    "situation": "p95 latency creeps, deploys get slower, memory balloons. 'Rails doesn't scale' is folklore (Zendesk, Shopify, GitHub, GitHub Actions-scale Rails monoliths all say otherwise) — but the folklore contains a real truth: Rails' defaults are velocity-first, and performance is a discipline you apply on purpose.",
+    "changes": "Performance becomes budget discipline, not archaeology. You measure first (benchmark-ips, log analysis, EXPLAIN), fix at the right layer (index, query shape, cache tier, memory pressure), and know the caching menu cold: fragment caching, Solid Cache as the Rails 8 default store, counter caches, eager loading — and invalidation, the hard part. You can cite the real-world evidence (multi-billion-req/day Rails monoliths) when someone proposes rewriting in Go as a 'fix.'",
+    "ready": "You can take a slow page and produce a profiling → query → index → cache chain with measured before/after p95; you choose cache tiers and invalidation strategies that stay correct under load; and you can argue Rails' scaling case with evidence and know the thresholds where it stops arguing for you.",
+    "practice": "Profile the slowest page in your app (or a seeded clone of a public one). Find the dominant cost, fix it at the right layer, and measure p95 before/after at two data sizes (1× and 50×) to prove both the win and its durability at scale.",
+    "startResources": [
+      {
+        "title": "Caching with Rails: An Overview (the Caching Guide)",
+        "author": "Rails Foundation",
+        "url": "https://guides.rubyonrails.org/caching_with_rails.html",
+        "format": "article",
+        "time": "35 min",
+        "desc": "Fragment caching, Russian-doll caching, cache stores (Solid Cache), and the invalidation model every Rails performance plan builds on."
+      },
+      {
+        "title": "Speed up Rails, Speed up Your Code",
+        "author": "Aaron Patterson (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/speed-up-rails-speed-up-your-code",
+        "format": "video",
+        "time": "45 min",
+        "desc": "Inside Active Record performance from a Rails core perf lead: benchmarking tools, allocation profiling, and the memory-vs-speed trade-offs shaping recent Rails."
+      },
+      {
+        "title": "A Rails Performance Guidebook: from 0 to 1B requests/day",
+        "author": "Cristian Planas & Anatoly Mikhaylov (RubyEvents)",
+        "url": "https://www.rubyevents.org/talks/a-rails-performance-guidebook-from-0-to-1b-requests-day-helvetic-ruby-2023",
+        "format": "video",
+        "time": "50 min",
+        "desc": "Zendesk-scale Rails: monitoring, error budgets, DB right-sizing, write-through caching, cold storage, product limits — the performance playbook at real scale."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "Rails Scales!",
+        "author": "Cristian Planas",
+        "url": "https://pragprog.com/titles/cprpo/rails-scales/",
+        "format": "book",
+        "time": "~8 hrs",
+        "desc": "The current definitive book on Rails performance and growth — from monitoring and product design to memory-aware coding — by a Zendesk tech lead."
+      },
+      {
+        "title": "High Performance PostgreSQL for Rails",
+        "author": "Andrew Atkinson",
+        "url": "https://pragprog.com/titles/aapsql/high-performance-postgresql-for-rails/",
+        "format": "book",
+        "time": "~12 hrs",
+        "desc": "The database deep dive: slow-query triage, index strategy, zero-downtime migrations, partitioning — where most Rails performance work actually happens."
+      },
+      {
+        "title": "Bullet",
+        "author": "flyerhzm",
+        "url": "https://github.com/flyerhzm/bullet",
+        "format": "guide",
+        "time": "10 min",
+        "desc": "Automated N+1 detection — most Rails perf wins start here in dev and CI."
+      },
+      {
+        "title": "Under Deconstruction: The State of Shopify's Monolith",
+        "author": "Shopify Engineering",
+        "url": "https://shopify.engineering/shopify-monolith",
+        "format": "article",
+        "time": "30 min",
+        "desc": "What 'Rails at extreme scale' concretely looks like — the reference evidence against the 'Rails doesn't scale' folklore."
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "cls": "c0",
+    "title": "Use AI as a Rails Thinking Partner",
+    "situation": "AI agents write Rails unusually well — the framework's conventions, maturity, and stable APIs give models dense training signal. That cuts both ways: agents generate confident, plausible code that can be subtly wrong or unsafe, and it's tempting to skip the security and testing discipline Caps 5–6 build.",
+    "changes": "You use AI leverage in the places Rails makes it safe: migrations and specs as reviewable diffs, schema and codebase Q&A, scaffolding the boring 70% — while humans keep the correctness and security gates auth, policies, audit, test suite). You bring the Rails convention knowledge that lets you constrain agents usefully and review their output like a senior reviewing a junior. You know the honest failure data: agents can slow experts down on familiar code, and Rails' stability is the advantage that offsets it.",
+    "ready": "You have an agent-assisted Rails workflow that produces production-worthy code — tests, Brakeman audit, and review passing on agent output; and you can articulate where agents multiply your velocity versus where hand-writing it yourself stays faster and safer.",
+    "practice": "Build the same small feature twice: once fully hand-rolled (following Caps 1–6), once agent-first with a conventions + security-prompted workflow. Compare diffs, test coverage, security findings, and time; write down the reusable workflow that emerged, and note which gates stayed human.",
+    "startResources": [
+      {
+        "title": "Agentic Coding",
+        "author": "Armin Ronacher",
+        "url": "https://www.youtube.com/watch?v=bpWPEhO7RqE",
+        "format": "video",
+        "time": "71 min",
+        "desc": "Flask's creator on a real production agentic workflow: when agents excel, where they fail, and the practical workflow that emerges.",
+        "summaryUrl": "https://github.com/cristoslc/tl-learning-plan/blob/main/dist/summaries/agentic-coding-armin-ronacher.md"
+      },
+      {
+        "title": "AI Impact on Experienced Developer Productivity",
+        "author": "METR",
+        "url": "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+        "format": "research",
+        "time": "20 min",
+        "desc": "The sobering RCT: experienced devs were 19% slower with AI on familiar code while believing they were 20% faster. The calibration every 'AI-assisted' claim needs."
+      }
+    ],
+    "deeperResources": [
+      {
+        "title": "AI Tooling for Software Engineers in 2026",
+        "author": "Gergely Orosz / Pragmatic Engineer",
+        "url": "https://newsletter.pragmaticengineer.com/p/ai-tooling-2026",
+        "format": "article",
+        "time": "25 min",
+        "desc": "Survey data from ~1,000 engineers on what AI tooling is actually used and trusted — the noise-free baseline."
+      },
+      {
+        "title": "Agentic Engineering Patterns",
+        "author": "Simon Willison",
+        "url": "https://simonwillison.net/guides/agentic-engineering-patterns/",
+        "format": "guide",
+        "time": "30 min",
+        "desc": "Living guide to agent workflow patterns — review gates, sandboxing, and how to make agent output trustworthy."
+      },
+      {
+        "title": "A Year of Vibes",
+        "author": "Armin Ronacher",
+        "url": "https://lucumr.pocoo.org/2025/12/22/a-year-of-vibes/",
+        "format": "article",
+        "time": "15 min",
+        "desc": "Twelve months of agentic coding in production: what held up, what fell over, and how the practice matured."
+      }
+    ]
+  }
+];
+
+const CHEVRON_SVG = '<svg class="subsection-chevron" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"/></svg>';
+
+let progress = JSON.parse(localStorage.getItem('rails-cap-progress') || '{}');
+let formatFilter = 'all';
+
+function saveProgress() { localStorage.setItem('rails-cap-progress', JSON.stringify(progress)); }
+
+function resetProgress() {
+  if (confirm('Reset all progress?')) {
+    progress = {};
+    saveProgress();
+    render();
+  }
+}
+
+function resourceHTML(r) {
+  const hidden = formatFilter !== 'all' && r.format !== formatFilter;
+  return `<div class="resource${hidden ? ' hidden' : ''}" data-format="${r.format}">
+    <span class="format-badge ${r.format}">${r.format}</span>
+    <div class="resource-info">
+      <div class="resource-title"><a href="${r.url}" target="_blank" rel="noopener">${r.title}</a>${r.summaryUrl ? ` (<a href="${r.summaryUrl}" target="_blank" rel="noopener">summary</a>)` : ''}</div>
+      <div class="resource-author">${r.author}</div>
+      <div class="resource-desc">${r.desc}</div>
+    </div>
+    <span class="resource-time">${r.time}</span>
+  </div>`;
+}
+
+function subsection(id, label, count, content) {
+  return `<div class="subsection" aria-expanded="false" id="${id}">
+    <button class="subsection-toggle" aria-controls="${id}-body" aria-expanded="false" onclick="toggleSub('${id}')">
+      ${CHEVRON_SVG}
+      ${label}
+      <span class="subsection-count">${count}</span>
+    </button>
+    <div class="subsection-body" id="${id}-body" role="region" aria-labelledby="${id}">
+      ${content}
+    </div>
+  </div>`;
+}
+
+function getCapabilityCard(id) {
+  return document.getElementById(`capability-${id}`);
+}
+
+const capabilityGlowTimers = new WeakMap();
+const capabilityJumpOffset = 20;
+
+function highlightCapabilityCard(card) {
+  const priorTimer = capabilityGlowTimers.get(card);
+  if (priorTimer) window.clearTimeout(priorTimer);
+
+  card.classList.remove('is-jump-target');
+  void card.offsetWidth;
+  card.classList.add('is-jump-target');
+
+  const timer = window.setTimeout(function() {
+    card.classList.remove('is-jump-target');
+    capabilityGlowTimers.delete(card);
+  }, 3400);
+
+  capabilityGlowTimers.set(card, timer);
+}
+
+function scrollCapabilityCardIntoView(card) {
+  const container = document.querySelector('.content-pane');
+
+  if (!container || !container.contains(card)) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    return;
+  }
+
+  const containerRect = container.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  const targetTop = container.scrollTop + (cardRect.top - containerRect.top) - capabilityJumpOffset;
+
+  container.scrollTo({
+    top: Math.max(targetTop, 0),
+    behavior: 'smooth'
+  });
+}
+
+function jumpToCapability(id) {
+  const card = getCapabilityCard(id);
+  if (!card) return false;
+
+  scrollCapabilityCardIntoView(card);
+  card.setAttribute('tabindex', '-1');
+  card.focus({ preventScroll: true });
+  highlightCapabilityCard(card);
+
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState(null, '', `#capability-${id}`);
+  }
+
+  return true;
+}
+
+function bindMermaidNodeJumps() {
+  const nodes = document.querySelectorAll('#capability-graph svg g.node[id*="flowchart-C"]');
+  if (!nodes.length) return false;
+
+  nodes.forEach(node => {
+    if (node.dataset.jumpBound === 'true') return;
+
+    const match = node.id.match(/flowchart-C(\d+)-/);
+    if (!match) return;
+
+    const capabilityId = Number(match[1]);
+    if (!getCapabilityCard(capabilityId)) return;
+
+    node.dataset.jumpBound = 'true';
+    node.classList.add('clickable');
+    node.setAttribute('role', 'link');
+    node.setAttribute('tabindex', '0');
+    node.setAttribute('aria-label', `Jump to Capability ${capabilityId}`);
+
+    node.addEventListener('click', function() {
+      jumpToCapability(capabilityId);
+    });
+
+    node.addEventListener('keydown', function(event) {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      jumpToCapability(capabilityId);
+    });
+  });
+
+  return true;
+}
+
+function watchMermaidNodeJumps() {
+  const graph = document.getElementById('capability-graph');
+  if (!graph) return;
+
+  const tryBind = function() {
+    return bindMermaidNodeJumps();
+  };
+
+  if (tryBind()) return;
+
+  const observer = new MutationObserver(function() {
+    if (!tryBind()) return;
+    observer.disconnect();
+  });
+
+  observer.observe(graph, { childList: true, subtree: true });
+}
+
+function render() {
+  const container = document.getElementById('capabilities');
+  container.innerHTML = DATA.slice().sort((a, b) => a.id - b.id).map(cap => {
+    const isDone = progress[cap.id];
+    const startCount = cap.startResources.filter(r => formatFilter === 'all' || r.format === formatFilter).length;
+    const deeperCount = cap.deeperResources.filter(r => formatFilter === 'all' || r.format === formatFilter).length;
+
+    const startHTML = `<div class="resources">${cap.startResources.map(resourceHTML).join('')}</div>`;
+    const deeperHTML = `<div class="resources">${cap.deeperResources.map(resourceHTML).join('')}</div>`;
+    const practiceHTML = `<div class="practice-box">${cap.practice}</div>`;
+
+    const capLabel = `Capability ${cap.id}`;
+    const capNum = cap.id;
+
+    return `<article id="capability-${cap.id}" class="capability${isDone ? ' completed' : ''}" role="listitem" aria-label="${capLabel}: ${cap.title}" data-capability-id="${cap.id}">
+      <div class="cap-header">
+        <div class="cap-number ${cap.cls}" aria-hidden="true">${capNum}</div>
+        <div class="cap-header-content">
+          <div class="cap-title-row">
+            <h3 class="cap-title">${cap.title}</h3>
+            <input type="checkbox" class="cap-check" aria-label="Mark ${capLabel} as complete" ${isDone ? 'checked' : ''} onchange="toggleCheck(${cap.id}, this.checked)">
+          </div>
+        </div>
+      </div>
+      <div class="cap-body">
+        <div class="section-label">The situation</div>
+        <p class="prose">${cap.situation}</p>
+        <div class="section-label">What changes</div>
+        <p class="prose">${cap.changes}</p>
+        <div class="section-label">You're ready when</div>
+        <div class="ready-box">${cap.ready}</div>
+      </div>
+      ${subsection(`cap${cap.id}-start`, 'Start here', startCount + ' resource' + (startCount !== 1 ? 's' : ''), startHTML)}
+      ${subsection(`cap${cap.id}-deeper`, 'Go deeper', deeperCount + ' resource' + (deeperCount !== 1 ? 's' : ''), deeperHTML)}
+      ${subsection(`cap${cap.id}-practice`, 'Practice This', '', practiceHTML)}
+    </article>`;
+  }).join('');
+}
+
+function toggleSub(id) {
+  const el = document.getElementById(id);
+  const expanded = el.getAttribute('aria-expanded') === 'true';
+  el.setAttribute('aria-expanded', !expanded);
+  el.querySelector('.subsection-toggle').setAttribute('aria-expanded', !expanded);
+}
+
+function toggleCheck(id, checked) {
+  progress[id] = checked;
+  saveProgress();
+  // Update border without full re-render
+  const capLabel = `Capability ${id}`;
+  const card = document.querySelector(`[aria-label="${capLabel}: ${DATA.find(c=>c.id===id).title}"]`);
+  if (card) card.classList.toggle('completed', checked);
+}
+
+// --- Filters ---
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    formatFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    btn.setAttribute('aria-pressed', 'true');
+    render();
+  });
+});
+
+render();
+
+// --- Theme toggle ---
+(function() {
+  var pref = localStorage.getItem('theme-preference') || 'auto';
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function applyTheme(p) {
+    pref = p;
+    var theme = p === 'night' ? 'dark' : p === 'day' ? 'light' : mq.matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme-preference', p);
+    localStorage.setItem('theme-preference', p);
+    document.querySelectorAll('[data-theme-btn]').forEach(function(b) {
+      var val = b.getAttribute('data-theme-btn');
+      b.setAttribute('aria-pressed', val === (p === 'day' ? 'day' : p === 'night' ? 'night' : 'auto') ? 'true' : 'false');
+    });
+  }
+
+  applyTheme(pref);
+
+  document.querySelectorAll('[data-theme-btn]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      applyTheme(btn.getAttribute('data-theme-btn'));
+    });
+  });
+
+  mq.addEventListener('change', function() {
+    if (pref === 'auto') applyTheme('auto');
+  });
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      document.documentElement.classList.add('transitions-enabled');
+    });
+  });
+})();
+</script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({
+  startOnLoad: false,
+  securityLevel: 'loose',
+  flowchart: {
+    curve: 'basis',
+    padding: 18,
+    htmlLabels: false,
+    nodeSpacing: 24,
+    rankSpacing: 36,
+    useMaxWidth: true
+  }
+});
+
+await mermaid.run({
+  querySelector: '#capability-graph .mermaid'
+});
+
+watchMermaidNodeJumps();
+</script>
+</body>
+</html>

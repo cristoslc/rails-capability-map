@@ -1,0 +1,47 @@
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#eef0fa',
+    'primaryBorderColor': '#00049E',
+    'primaryTextColor': '#00049E',
+    'lineColor': '#706F6F',
+    'fontSize': '13px',
+    'fontFamily': 'Arial, sans-serif',
+    'edgeLabelBackground': '#ffffff'
+  }
+}}%%
+graph TD
+    C1["1. Rails Core & Conventions"]
+    C2["2. Active Record & Data"]
+    C3["3. Hotwire Frontend"]
+    C4["4. Background Jobs"]
+    C5["5. Security & Auth"]
+    C6["6. Testing"]
+    C7["7. Growing the Codebase"]
+    C8["8. Ship & Operate"]
+    C9["9. Performance"]
+    C10["10. AI Partner"]:::alongside
+
+    C1 --> C2
+    C1 --> C3
+    C2 --> C4
+    C2 --> C7
+    C2 --> C9
+    C3 --> C4
+    C4 --> C8
+    C5 --> C6
+    C6 --> C7
+    C7 --> C8
+    C8 --> C9
+
+    classDef default fill:#eef0fa,stroke:#00049E,stroke-width:2px,color:#00049E,font-weight:700,rx:20,ry:20
+    classDef alongside fill:#f8f8f8,stroke:#706F6F,stroke-width:1.5px,stroke-dasharray:5 4,color:#4a4a49,font-weight:600,rx:20,ry:20
+
+    style C2 fill:#e6f7f7,stroke:#006b6b,color:#005555
+    style C3 fill:#ededfc,stroke:#1a1f99,color:#1a1f99
+    style C4 fill:#e6f4fa,stroke:#00698f,color:#005a7a
+    style C5 fill:#f2f0f8,stroke:#5a4a8a,color:#4a3d75
+    style C6 fill:#edf7f1,stroke:#2d7a4a,color:#1f6338
+    style C7 fill:#fef3e6,stroke:#8a4500,color:#6b3600
+    style C8 fill:#f2e6e9,stroke:#8a1538,color:#6b0f2a
+    style C9 fill:#f8edf4,stroke:#7a2d5a,color:#5e1d45
